@@ -8,12 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
-/**
- * Custom implementation of UserDetailsService for loading user details from database.
- * Used by Spring Security for authentication.
- */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -21,18 +15,21 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     /**
-     * Loads user details by username for authentication.
-     * @param username the username to load
-     * @return UserDetails object for Spring Security
-     * @throws UsernameNotFoundException if user not found
+     * Loads user details by email for authentication.
+     * Spring Security still calls this method internally.
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
-        return user.map(u -> org.springframework.security.core.userdetails.User.withUsername(u.getUsername())
-                .password(u.getPassword())
-                .roles(u.getRole()) // Automatically adds "ROLE_" prefix
-                .build())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found with email: " + email)
+                );
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())   // ✅ email used as principal
+                .password(user.getPassword())
+                .roles(user.getRole())            // ROLE_ prefix auto-added
+                .build();
     }
 }

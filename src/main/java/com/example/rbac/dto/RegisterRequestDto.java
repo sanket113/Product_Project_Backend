@@ -14,6 +14,7 @@ public class RegisterRequestDto {
      * The desired username for the new account.
      */
     private String username;
+    private String email;
 
     /**
      * The password for the new account.
