@@ -13,7 +13,7 @@ public class LoginRequestDto {
     /**
      * The username of the user attempting to log in.
      */
-    private String username;
+    private String email;
 
     /**
      * The password of the user.

@@ -39,8 +39,8 @@ public class ManagerController {
      * @return success or error response
      */
     @DeleteMapping("/users/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable String username) {
-        Optional<User> userOptional = userRepository.findByUsername(username);
+    public ResponseEntity<String> deleteUser(@PathVariable String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if ("USER".equals(user.getRole())) {

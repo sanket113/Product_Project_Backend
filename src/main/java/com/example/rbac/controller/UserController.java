@@ -24,11 +24,11 @@ public class UserController {
      * Retrieves the profile of the currently authenticated user.
      * @return User object containing user details
      */
-    @GetMapping("/profile")
-    public User getProfile() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
+//    @GetMapping("/profile")
+//    public User getProfile() {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        String email = auth.getE();
+//        return userRepository.findByEmail(email)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//    }
 }

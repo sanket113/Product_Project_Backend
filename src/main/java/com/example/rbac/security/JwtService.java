@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 /**
  * Service for handling JWT token operations.
- * Provides methods for generating, validating, and extracting information from JWT tokens.
+ * Uses EMAIL as the JWT subject.
  */
 @Service
 public class JwtService {
@@ -25,10 +25,6 @@ public class JwtService {
     private final Key signingKey;
     private final long expiration;
 
-    /**
-     * Constructor that initializes the signing key and expiration time from properties.
-     * @param properties JWT configuration properties
-     */
     public JwtService(JwtProperties properties) {
         this.signingKey = Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(properties.getSecret()));
@@ -38,38 +34,36 @@ public class JwtService {
     // ================= TOKEN GENERATION =================
 
     /**
-     * Generates a JWT token for the given user details.
-     * @param userDetails the user details
-     * @return the generated JWT token
+     * Generates a JWT token for the authenticated user.
+     * Subject = email
      */
     public String generateToken(UserDetails userDetails) {
-        return createToken(new HashMap<>(), userDetails.getUsername());
+        return generateToken(new HashMap<>(), userDetails);
     }
 
-    /**
-     * Creates a JWT token with claims and subject.
-     * @param claims additional claims to include
-     * @param subject the subject (username)
-     * @return the created token
-     */
-    private String createToken(Map<String, Object> claims, String subject) {
+    public String generateToken(
+            Map<String, Object> extraClaims,
+            UserDetails userDetails
+    ) {
+        return createToken(extraClaims, userDetails.getUsername()); // EMAIL
+    }
+
+    private String createToken(Map<String, Object> claims, String email) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(subject)
+                .setSubject(email) // EMAIL stored as sub
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // ================= TOKEN VALIDATION =================
+    // ================= TOKEN EXTRACTION =================
 
     /**
-     * Extracts the username from the JWT token.
-     * @param token the JWT token
-     * @return the username
+     * Extracts email from JWT subject.
      */
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -85,8 +79,11 @@ public class JwtService {
                 .getBody();
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        return extractUsername(token).equals(userDetails.getUsername())
+    // ================= TOKEN VALIDATION =================
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String email = extractEmail(token);
+        return email.equals(userDetails.getUsername())
                 && !isTokenExpired(token);
     }
 

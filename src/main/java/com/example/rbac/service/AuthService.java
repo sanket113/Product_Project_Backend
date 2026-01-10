@@ -36,20 +36,20 @@ public class AuthService {
     /**
      * Registers a new user with the provided details.
      * Validates username uniqueness and role validity.
-     * @param request the registration request containing username, password, and role
-     * @throws RuntimeException if username already exists or role is invalid
+     * @param request the registration request containing username, email, password, and role
+     * @throws RuntimeException if email already exists or role is invalid
      */
     // 🔹 REGISTER
     public void register(RegisterRequestDto request) {
 
         // check duplicate user
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
         }
 
         User user = new User();
         user.setUsername(request.getUsername());
-
+        user.setEmail(request.getEmail());
         // ✅ HASH PASSWORD
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -75,7 +75,7 @@ public class AuthService {
      */
     // 🔹 LOGIN
     public LoginResponseDto login(LoginRequestDto request) {
-        return authenticateAndGetToken(request.getUsername(), request.getPassword());
+        return authenticateAndGetToken(request.getEmail(), request.getPassword());
     }
 
     /**
@@ -86,7 +86,7 @@ public class AuthService {
      */
     // 🔹 SUPER ADMIN LOGIN
     public LoginResponseDto superAdminLogin(LoginRequestDto request) {
-        LoginResponseDto loginResponse = authenticateAndGetToken(request.getUsername(), request.getPassword());
+        LoginResponseDto loginResponse = authenticateAndGetToken(request.getEmail(), request.getPassword());
         if (!"ROLE_SUPER_ADMIN".equals(loginResponse.getRole())) {
             throw new RuntimeException("Access Denied: Not a Super Admin");
         }
@@ -95,13 +95,13 @@ public class AuthService {
 
     /**
      * Performs authentication and generates JWT token.
-     * @param username the username
+     * @param email the username
      * @param password the password
      * @return LoginResponseDto with token and role
      */
-    private LoginResponseDto authenticateAndGetToken(String username, String password) {
+    private LoginResponseDto authenticateAndGetToken(String email, String password) {
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password));
+                new UsernamePasswordAuthenticationToken(email, password));
 
         UserDetails user = (UserDetails) auth.getPrincipal();
         String token = jwtService.generateToken(user);
@@ -116,8 +116,9 @@ public class AuthService {
      */
     // 🔹 CREATE SUPER ADMIN (Internal use)
     public void createSuperAdmin() {
-        User admin = userRepository.findByUsername("superadmin").orElse(new User());
+        User admin = userRepository.findByEmail("admin@gmail.com").orElse(new User());
         admin.setUsername("superadmin");
+        admin.setEmail("admin@gmail.com");
         admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setRole("SUPER_ADMIN");
         userRepository.save(admin);
