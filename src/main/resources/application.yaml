@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: rbac
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+
+jwt:
+  secret: m1X3Q0vH7s9dYpQZ9KJ3GJ5J6z6pWvF1K9xF4cP8RzU=
+  expiration: 3600000
+
+logging:
+  level:
+    org.springframework.security: DEBUG
