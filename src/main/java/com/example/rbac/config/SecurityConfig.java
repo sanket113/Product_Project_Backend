@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/manager/**").hasRole("MANAGER")
                         .requestMatchers("/user/**").hasAnyRole("SUPER_ADMIN", "MANAGER", "USER")
-
+                        .requestMatchers("/api/tasks/**").authenticated()
                         .anyRequest().authenticated())
 
                 // ❗ STATELESS (JWT)

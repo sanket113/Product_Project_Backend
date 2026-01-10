@@ -3,11 +3,13 @@ package com.example.rbac.security;
 import com.example.rbac.entity.User;
 import com.example.rbac.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,17 +24,20 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     /**
      * Loads user details by username for authentication.
+     *
      * @param username the username to load
      * @return UserDetails object for Spring Security
      * @throws UsernameNotFoundException if user not found
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
-        return user.map(u -> org.springframework.security.core.userdetails.User.withUsername(u.getUsername())
-                .password(u.getPassword())
-                .roles(u.getRole()) // Automatically adds "ROLE_" prefix
-                .build())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())) // <-- THIS LINE
+        );
     }
 }
