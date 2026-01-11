@@ -24,9 +24,11 @@ public class User {
     /**
      * Unique username for authentication.
      */
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String username;
 
+    @Column(nullable = false, unique = true)
+    private String email;
     /**
      * Hashed password for security.
      */

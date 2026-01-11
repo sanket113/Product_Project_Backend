@@ -38,7 +38,7 @@ public class SuperAdminController {
      */
     @DeleteMapping("/users/{username}")
     public ResponseEntity<String> deleteUser(@PathVariable String username) {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.deleteById(user.getId());
         return ResponseEntity.ok("User deleted successfully");
